@@ -157,6 +157,7 @@ showAlertDialog(BuildContext context) {
         child: const Text('Cerrar Sesion'),
         onPressed: () {
           BlocProvider.of<AuthBloc>(context).add(SignOutEvent());
+          Navigator.of(context).pop();
         },
       ),
     ],

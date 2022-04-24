@@ -30,7 +30,7 @@ class FindTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Material App',
+        title: 'FindTrackApp',
         theme: ThemeData(primaryColor: Colors.purple),
         darkTheme: ThemeData(brightness: Brightness.dark),
         themeMode: ThemeMode.dark,
