@@ -6,3 +6,5 @@ abstract class SongEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+//class LaunchUrlEvent extends SongEvent {}

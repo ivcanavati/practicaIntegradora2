@@ -49,11 +49,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       Map<String, String> data = {
         'audio': recordingEncoded,
         'api_token': '$audToken',
-        'return': 'apple_music,spotify',
+        'return': 'apple_music,spotify,deezer',
       };
       final res = await http.post(uri, body: data);
       if (res.statusCode == 200) {
         var infoSong = jsonDecode(res.body);
+        print(infoSong.toString());
         emit(HomeSuccessState(res: infoSong));
       }
     } catch (e) {

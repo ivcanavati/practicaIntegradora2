@@ -20,10 +20,14 @@ class _awatingApiState extends State<awatingApi> {
               context,
               MaterialPageRoute(
                   builder: (context) => songQuery(songInfo: state.res)));
+        } else {
+          BlocProvider.of<HomeBloc>(context).add(SendDataEvent());
         }
       },
       builder: (context, state) {
-        BlocProvider.of<HomeBloc>(context).add(SendDataEvent());
+        if (state is! HomeSuccessState) {
+          BlocProvider.of<HomeBloc>(context).add(SendDataEvent());
+        }
         return Scaffold(
           body: Center(
             child: Text("Esperando respuesta..."),
