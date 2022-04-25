@@ -7,4 +7,4 @@ abstract class SongEvent extends Equatable {
   List<Object> get props => [];
 }
 
-//class LaunchUrlEvent extends SongEvent {}
+class queryEvent extends SongEvent {}

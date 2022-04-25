@@ -9,4 +9,4 @@ abstract class SongState extends Equatable {
 
 class SongInitial extends SongState {}
 
-//class LaunchedState extends SongState {}
+class querySuccessState extends SongState {}
