@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:record/record.dart';
 import 'package:practica2/config/secrets.dart';
@@ -16,6 +18,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<ListeningEvent>(_listen);
     on<RecordEvent>(_recordSong);
     on<SendDataEvent>(_sendSong);
+    on<QueryEvent>(_query);
+    on<DeleteEvent>(_delete);
+    on<DeleteFavEvent>(_deleteFavs);
   }
 
   FutureOr<void> _listen(event, emit) async {
@@ -54,7 +59,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final res = await http.post(uri, body: data);
       if (res.statusCode == 200) {
         var infoSong = jsonDecode(res.body);
-        print(infoSong.toString());
         emit(HomeSuccessState(res: infoSong));
       }
     } catch (e) {
@@ -62,5 +66,91 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       print(e);
       throw Error();
     }
+  }
+}
+
+FutureOr<void> _query(event, emit) async {
+  try {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    Map<String, dynamic> songData = {
+      'song': {
+        'album': event.data["result"]["album"],
+        'apple': event.data["result"]["apple_music"]["url"],
+        'artist': event.data["result"]["artist"],
+        'multi': event.data["result"]["song_link"],
+        'portrait': event.data["result"]["spotify"]["album"]["images"][0]
+            ["url"],
+        'releaseDate': event.data["result"]["release_date"],
+        'spotify': event.data["result"]["spotify"]["external_urls"]["spotify"],
+        'title': event.data["result"]["title"],
+      }
+    };
+    print('enviando');
+
+    users.add({
+      'user': FirebaseAuth.instance.currentUser?.email,
+      'favorites': songData
+    });
+
+    emit(querySuccessState());
+  } catch (e) {
+    emit(HomeErrorState());
+    print(e);
+    throw Error();
+  }
+}
+
+FutureOr<void> _delete(event, emit) async {
+  try {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    Map<String, dynamic> songData = {
+      'song': {
+        'album': event.data["result"]["album"],
+        'apple': event.data["result"]["apple_music"]["url"],
+        'artist': event.data["result"]["artist"],
+        'multi': event.data["result"]["song_link"],
+        'portrait': event.data["result"]["spotify"]["album"]["images"][0]
+            ["url"],
+        'releaseDate': event.data["result"]["release_date"],
+        'spotify': event.data["result"]["spotify"]["external_urls"]["spotify"],
+        'title': event.data["result"]["title"],
+      }
+    };
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('user', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .where('favorites', isEqualTo: songData)
+        .get();
+
+    for (DocumentSnapshot ds in querySnapshot.docs) {
+      ds.reference.delete();
+    }
+
+    emit(queryDeleteState());
+  } catch (e) {
+    emit(HomeErrorState());
+    print(e);
+    throw Error();
+  }
+}
+
+FutureOr<void> _deleteFavs(event, emit) async {
+  try {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('user', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+        .where('favorites', isEqualTo: event.data)
+        .get();
+
+    for (DocumentSnapshot ds in querySnapshot.docs) {
+      ds.reference.delete();
+    }
+
+    emit(queryDeleteState());
+  } catch (e) {
+    emit(HomeErrorState());
+    print(e);
+    throw Error();
   }
 }

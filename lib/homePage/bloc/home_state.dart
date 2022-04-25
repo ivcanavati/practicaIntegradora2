@@ -28,3 +28,7 @@ class queryState extends HomeState {
 }
 
 class HomeErrorState extends HomeState {}
+
+class querySuccessState extends HomeState {}
+
+class queryDeleteState extends HomeState {}

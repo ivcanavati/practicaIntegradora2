@@ -20,8 +20,6 @@ class _awatingApiState extends State<awatingApi> {
               context,
               MaterialPageRoute(
                   builder: (context) => songQuery(songInfo: state.res)));
-        } else {
-          BlocProvider.of<HomeBloc>(context).add(SendDataEvent());
         }
       },
       builder: (context, state) {

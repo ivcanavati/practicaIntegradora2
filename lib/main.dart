@@ -5,7 +5,6 @@ import 'package:practica2/auth/bloc/auth_bloc.dart';
 import 'package:practica2/auth/loginScreen.dart';
 import 'package:practica2/homePage/bloc/home_bloc.dart';
 import 'package:practica2/homePage/homePage.dart';
-import 'package:practica2/songs/bloc/song_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,9 +16,6 @@ void main() async {
       ),
       BlocProvider(
         create: (context) => HomeBloc(),
-      ),
-      BlocProvider(
-        create: (context) => SongBloc(),
       ),
     ],
     child: FindTrackApp(),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:practica2/homePage/bloc/home_bloc.dart';
 import 'package:practica2/homePage/homePage.dart';
-import 'package:practica2/songs/bloc/song_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+final Map<String, dynamic> data = {};
 
 class songQuery extends StatefulWidget {
   final Map<String, dynamic> songInfo;
@@ -14,12 +16,11 @@ class songQuery extends StatefulWidget {
 }
 
 class _songQueryState extends State<songQuery> {
+  Color _iconColor = Colors.white;
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SongBloc, SongState>(
-      listener: (context, state) {
-        if (state is SongInitial) {}
-      },
+    return BlocConsumer<HomeBloc, HomeState>(
+      listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -33,7 +34,85 @@ class _songQueryState extends State<songQuery> {
             actions: [
               IconButton(
                 icon: Icon(Icons.favorite),
-                onPressed: () {},
+                color: _iconColor,
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      if (_iconColor == Colors.red) {
+                        return AlertDialog(
+                          title: Text(
+                            "Eliminar favoritos",
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: const <Widget>[
+                                Text(
+                                    'El elemento sera eliminado a tus favoritos'),
+                                Text('¿Quiere continuar?')
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Cancelar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                ;
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Continuar'),
+                              onPressed: () {
+                                _iconColor = Colors.white;
+                                BlocProvider.of<HomeBloc>(context)
+                                    .add(DeleteEvent(widget.songInfo));
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      } else {
+                        return AlertDialog(
+                          title: Text(
+                            "Agregar a favoritos",
+                            style: TextStyle(
+                                fontSize: 25, fontWeight: FontWeight.bold),
+                          ),
+                          content: SingleChildScrollView(
+                            child: ListBody(
+                              children: const <Widget>[
+                                Text(
+                                    'El elemento sera agregado a tus favoritos'),
+                                Text('¿Quiere continuar?')
+                              ],
+                            ),
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('Cancelar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                ;
+                              },
+                            ),
+                            TextButton(
+                              child: const Text('Continuar'),
+                              onPressed: () {
+                                BlocProvider.of<HomeBloc>(context)
+                                    .add(QueryEvent(widget.songInfo));
+                                Navigator.of(context).pop();
+                                _iconColor = Colors.red;
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                    },
+                  );
+                },
               ),
             ],
             title: Text("Here you go",

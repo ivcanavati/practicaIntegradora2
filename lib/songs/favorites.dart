@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:practica2/homePage/homePage.dart';
-import 'package:practica2/songs/bloc/song_bloc.dart';
+
+import '../homePage/bloc/home_bloc.dart';
 
 class Favorites extends StatefulWidget {
   Favorites({Key? key}) : super(key: key);
@@ -13,14 +15,19 @@ class Favorites extends StatefulWidget {
 }
 
 class _FavoritesState extends State<Favorites> {
-  final Stream<QuerySnapshot> users =
-      FirebaseFirestore.instance.collection('users').snapshots();
+  Color _iconColor = Colors.red;
+
+  final Stream<QuerySnapshot> users = FirebaseFirestore.instance
+      .collection('users')
+      .where('user', isEqualTo: FirebaseAuth.instance.currentUser?.email)
+      .snapshots();
+  int currentIndex = 0;
+  Map<int, dynamic> songs = {};
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SongBloc, SongState>(
-      listener: (context, state) {
-        // TODO: implement listener
-      },
+    return BlocConsumer<HomeBloc, HomeState>(
+      listener: (context, state) {},
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -55,7 +62,10 @@ class _FavoritesState extends State<Favorites> {
                         return ListView.builder(
                           itemCount: data.size,
                           itemBuilder: (context, index) {
+                            songs[currentIndex] =
+                                data.docs[index]['favorites']['song'];
                             return Stack(
+                              //index: currentIndex,
                               children: [
                                 Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
@@ -63,13 +73,23 @@ class _FavoritesState extends State<Favorites> {
                                     Stack(
                                       alignment: Alignment.bottomCenter,
                                       children: [
-                                        Card(
-                                          semanticContainer: true,
-                                          clipBehavior:
-                                              Clip.antiAliasWithSaveLayer,
-                                          child: Image.network(
-                                            '${data.docs[index]['favorites']['song']['portrait'].toString()}',
-                                            fit: BoxFit.fill,
+                                        Container(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .width -
+                                              150,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .height -
+                                              10,
+                                          child: Card(
+                                            semanticContainer: true,
+                                            clipBehavior:
+                                                Clip.antiAliasWithSaveLayer,
+                                            child: Image.network(
+                                              '${data.docs[index]['favorites']['song']['portrait'].toString()}',
+                                              fit: BoxFit.fitWidth,
+                                            ),
                                           ),
                                         ),
                                         Stack(
@@ -80,7 +100,7 @@ class _FavoritesState extends State<Favorites> {
                                                 width: MediaQuery.of(context)
                                                         .size
                                                         .width -
-                                                    9,
+                                                    8,
                                                 child: const DecoratedBox(
                                                   decoration:
                                                       const BoxDecoration(
@@ -109,16 +129,61 @@ class _FavoritesState extends State<Favorites> {
                                         ),
                                       ],
                                     ),
+                                    SizedBox(
+                                      height: 30,
+                                    )
                                   ],
                                 ),
                                 IconButton(
-                                    onPressed: () {},
-                                    icon: Icon(Icons.favorite)),
+                                  icon: Icon(Icons.favorite),
+                                  color: _iconColor,
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text(
+                                            "Eliminar favoritos",
+                                            style: TextStyle(
+                                                fontSize: 25,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          content: SingleChildScrollView(
+                                            child: ListBody(
+                                              children: const <Widget>[
+                                                Text(
+                                                    'El elemento sera eliminado a tus favoritos'),
+                                                Text('¿Quiere continuar?')
+                                              ],
+                                            ),
+                                          ),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              child: const Text('Cancelar'),
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                ;
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: const Text('Continuar'),
+                                              onPressed: () {
+                                                _iconColor = Colors.white;
+                                                /*BlocProvider.of<HomeBloc>(
+                                                        context)
+                                                    .add(DeleteFavEvent(
+                                                        songs[widget.]));*/
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ],
                             );
-
-                            /*Text(
-                                'Ejemplo: ${data.docs[index]['favorites'].toString()}');*/
                           },
                         );
                       },
